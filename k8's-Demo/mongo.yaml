@@ -9,7 +9,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx
+      app: mongo
   template: # ---- this will defined the blue print ------
     metadata:
       labels: # --- labels are key/value pairs that are attached to k8s resources. Labels are additional identifiers
