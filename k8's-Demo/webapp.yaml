@@ -1,0 +1,60 @@
+# creating deployments and service for mongo in same file 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  labels:
+    app: webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapp
+  template: # ---- this will defined the blue print ------
+    metadata:
+      labels: # --- labels are key/value pairs that are attached to k8s resources. Labels are additional identifiers
+        app: webapp 
+    spec:
+      containers:
+      - name: webapp
+        image: nanajanashia/k8s-demo-app:v1.0
+        ports:
+        - containerPort: 3000
+        #when web application will start - it will need to connect to mongo db
+        env:
+        - name: USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-user 
+        - name: USER_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-user
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config
+              key: mongo-url
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service # -- this is what we defined in mongo-config map ---
+spec:
+  type: NodePort # we need to access through web 
+  selector:
+    app: webapp # -- this should match with app name in deployment given above --
+  ports:
+    - protocol: TCP
+      port: 3000 #-- it can be anything, but to keep simple we can give same port ---
+      targetPort: 3000 # -- this should match with containerPort in deployment given above --
+      nodePort: 30100  #it should be in range of 30000 to 32767

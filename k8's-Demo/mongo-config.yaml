@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  mongo-url: mongo-service #value will be the service that will create for mongo db application 
